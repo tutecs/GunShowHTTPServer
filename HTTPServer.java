@@ -1,13 +1,14 @@
 // The html server
 import java.io.*;
 import java.net.*;
+import java.util.*;
 import java.nio.file.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class HTTPServer
 {
 	private static int port = 8080;
+	private static int currentId = getCurrentId();
 	public static void main(String[] args)
 	{
 		try
@@ -32,7 +33,8 @@ public class HTTPServer
 					if(gucciGangParts[0].equals("POST") && gucciGangParts[1].equals("/submit.html"))
 					{
 						boolean noBlank = true;
-						String s = null;
+						String s = "";
+						String host = "";
 						int contentLength = 0;
 						while(noBlank)
 						{
@@ -40,7 +42,8 @@ public class HTTPServer
 							System.out.println(s);
 							if(s.toLowerCase().contains("content-length"))
 								contentLength = Integer.valueOf(s.split(" ")[1]);
-							
+							if(s.toLowerCase().contains("host"))
+								host = s.split(" ")[1];
 							if(s.equals(""))
 								noBlank = false;
 						}
@@ -48,9 +51,11 @@ public class HTTPServer
 						inFromClient.read(issue, 0, contentLength);
 						String issueString = new String(issue);
 						String message = issueString.substring(6);
-						// write message to issue file.
-						// possible format:
-						// id:date:host:resolved:issue:solution
+						storeIssue(host,message);
+						updateId();
+						message = getPage("index.html");
+						System.out.printf("Sending %s to \n%s\n", "index.html", connectionSocket.getInetAddress().getHostName());
+						outToClient.writeBytes(message);
 					}
 				}
 			}
@@ -60,23 +65,79 @@ public class HTTPServer
 			ex.printStackTrace();
 		}	
 	}
-	private static storeIssue(String host, String issue)
+	private static void storeIssue(String host, String issue)
 	{
-		
+		try
+		{
+			// format id:date:host:issue:resolved:solution
+			FileWriter writer = new FileWriter("issues.txt", true);
+			PrintWriter printer = new PrintWriter(writer);
+			SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss z");
+			Date current_time = new Date();
+			String date = formatter.format(current_time).toString();
+			String id = String.valueOf(currentId++);
+			String resolved = "false";
+			String solution = "";
+			printer.printf("%s|%s|%s|%s|%s|%s\n", id, date, host, issue, resolved, solution);
+			printer.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	private static String getPage(String webPage)
 	{
-		String body = getHTML(webPage);
-		String header = "HTTP/1.0 200 OK\n Server: GucciGang/1.0 Java/9.0.0\n";
-		SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss z");
-		Date current_time = new Date();
-		String date = formatter.format(current_time).toString();
-		int bodyLength = body.getBytes().length;
-		header = header + date + "\nContent-type: text/html; charset=utf-8\nContent-Length: ";
-		int headerLength = header.getBytes().length;
-		header = header + String.valueOf(bodyLength);
-		String headerBody = header + "\n\n" + body;
-		return headerBody;
+		try
+		{
+			String body = getHTML(webPage);
+			Scanner sc = new Scanner(new File("issues.txt"));
+			ArrayList<String> issues = new ArrayList<String>();
+			while(sc.hasNextLine())
+			{
+				issues.add(sc.nextLine());
+			}
+			StringBuffer bodyBuff = new StringBuffer(body);
+			
+			int comment = bodyBuff.indexOf("<!-- Oh hi mark -->") - 1;
+			String input;
+			for(int i = 0; i < issues.size(); i++)
+			{
+				System.out.println(issues.get(i));
+				String[] split = issues.get(i).split("::");
+				System.out.println(split.length);
+				input = "<tr>";
+				bodyBuff.insert(comment+1, input);
+				comment += input.length();
+				for(int j = 0; j < split.length; j++)
+				{
+					input = "<td>"+split[j]+"</td>";
+					bodyBuff.insert(comment+1, input);	 
+					comment += input.length();
+				}
+				input = "</tr>";
+				bodyBuff.insert(comment+1,input);
+				comment += input.length();
+			}
+			body = bodyBuff.toString();
+			
+			
+			String header = "HTTP/1.0 200 OK\n Server: GucciGang/1.0 Java/9.0.0\n";
+			SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss z");
+			Date current_time = new Date();
+			String date = formatter.format(current_time).toString();
+			int bodyLength = body.getBytes().length;
+			header = header + date + "\nContent-type: text/html; charset=utf-8\nContent-Length: ";
+			int headerLength = header.getBytes().length;
+			header = header + String.valueOf(bodyLength);
+			String headerBody = header + "\n\n" + body;
+			return headerBody;
+		}
+		catch(FileNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		return null;
 	}
 	private static String getHTML(String filename)
 	{
@@ -94,5 +155,25 @@ public class HTTPServer
 			ex.printStackTrace();
 		}
 		return "THIS WAS NOT PART OF GOD'S PLAN";
+	}
+	private static int getCurrentId()
+	{
+		String id = getHTML("id.txt");
+		id = id.trim();
+		int currentId = Integer.valueOf(id);
+		return currentId;
+	}
+	private static void updateId()
+	{
+		try
+		{
+			PrintWriter	writer = new PrintWriter("id.txt");
+			writer.printf("%d", currentId);
+			writer.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
