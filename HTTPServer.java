@@ -69,7 +69,7 @@ public class HTTPServer
 	{
 		try
 		{
-			// format id:date:host:issue:resolved:solution
+			// format id::date::host::issue::resolved::solution
 			FileWriter writer = new FileWriter("issues.txt", true);
 			PrintWriter printer = new PrintWriter(writer);
 			SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss z");
@@ -78,7 +78,7 @@ public class HTTPServer
 			String id = String.valueOf(currentId++);
 			String resolved = "false";
 			String solution = "";
-			printer.printf("%s|%s|%s|%s|%s|%s\n", id, date, host, issue, resolved, solution);
+			printer.printf("%s::%s::%s::%s::%s::%s\n", id, date, host, issue, resolved, solution);
 			printer.close();
 		}
 		catch (IOException e)
