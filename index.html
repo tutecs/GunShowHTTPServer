@@ -1,17 +1,41 @@
 <html>
 
 <head>
-
+<style>
+table, th, td {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+h1 {
+	color: Blue;
+}
+tr:nth-child(even) {
+    background-color: #D3D3D3;
+}
+</style>
 <title> At the gun show</title>
 
 </head>
 
-<body bgcolor="white" text="blue">
+<body bgcolor="white" text="black">
 
-<h1> My first page </h1>
-
+<h1>Welcome to my website at teh gun show</h1>
+<p>
 Please close this page, unless unless you're ready to go to for at the gun show,!
+</p>
+<table style="width:100%">
+	<tr>
+		<th>ID</th>
+		<th>Date</th>
+		<th>Host</th>
+		<th>Issue</th>
+		<th>Resolved</th>
+		<th>Solution</th>	
+	</tr>
 
+<!-- Oh hi mark -->
+</table>
+<br>
 <form action="/submit.html" method="post">
   <label for="issue">New Issue:</label><br>
   <textarea name="issue" cols="50" rows="10"></textarea><br>
