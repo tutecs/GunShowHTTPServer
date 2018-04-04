@@ -22,8 +22,7 @@ tr:nth-child(even) {
 <h1>Welcome to my website at teh gun show</h1>
 <p>
 Please close this page, unless unless you're ready to go to for at the gun show,!
-</p>
-<table style="width:100%">
+</p><table style="width:100%">
 	<tr>
 		<th>ID</th>
 		<th>Date</th>
@@ -38,10 +37,23 @@ Please close this page, unless unless you're ready to go to for at the gun show,
 <br>
 <form action="/submit.html" method="post">
   <label for="issue">New Issue:</label><br>
-  <textarea name="issue" cols="50" rows="10"></textarea><br>
+  <textarea name="issue" cols="50" rows="10" accept-charset="UTF-8"></textarea><br>
   <input type="submit">
 </form>
+<!--
+<form action= action="/submit_resolved.html" method="post">
+	<select name="resolved" id="resolved" onchange="this.form.submit()">
+    	<option value="solved">Solved</option>
+    	<option value="unsolved">UnSolved</option>
+	</select>
+</form>
 
+<select name="resloved" form="Status">
+    <option value="solved">Solved</option>
+    <option value="unsolved">UnSolved</option>
+    <option value="n/a">N/A</option>
+</select>
+-->
 </body>
 
 </html>
