@@ -49,13 +49,38 @@ public class HTTPServer
 						}
 						char[] issue = new char[contentLength];
 						inFromClient.read(issue, 0, contentLength);
-						String issueString = new String(issue);
+						for(int i = 0; i < issue.length; i++)
+						{
+							if(issue[i] == '+')
+								issue[i] = ' ';
+							if(issue[i] == '%')
+							{
+								String hex = "" + issue[i+1] + issue[i+2];
+								char newChar = (char) (Integer.parseInt(hex, 16));
+								issue[i] = newChar;
+								issue[i+1] = Character.MIN_VALUE;
+								issue[i+2] = Character.MIN_VALUE;
+								i += 2;
+							}
+						}
+						String issueString = String.valueOf(issue);
 						String message = issueString.substring(6);
-						storeIssue(host,message);
-						updateId();
-						message = getPage("index.html");
-						System.out.printf("Sending %s to \n%s\n", "index.html", connectionSocket.getInetAddress().getHostName());
-						outToClient.writeBytes(message);
+						System.out.println(message);
+						if(message.equals(""))
+						{
+							message = refreshPage("index.html");
+							System.out.printf("Sending %s to \n%s\n", "index.html", connectionSocket.getInetAddress().getHostName());
+							outToClient.writeBytes(message);
+						}
+						else
+						{
+							storeIssue(host,message);
+							updateId();
+							message = refreshPage("index.html");
+							System.out.println(message);
+							System.out.printf("Sending %s to \n%s\n", "index.html", connectionSocket.getInetAddress().getHostName());
+							outToClient.writeBytes(message);
+						}
 					}
 				}
 			}
@@ -65,6 +90,7 @@ public class HTTPServer
 			ex.printStackTrace();
 		}	
 	}
+
 	private static void storeIssue(String host, String issue)
 	{
 		try
@@ -85,6 +111,13 @@ public class HTTPServer
 		{
 			e.printStackTrace();
 		}
+	}
+	private static String refreshPage(String webPage)
+	{
+		String header = "HTTP/1.1 303 See Other\n";
+		header = header + "Location: /\n\n\n";
+		System.out.println(header);
+		return header;
 	}
 	private static String getPage(String webPage)
 	{
@@ -111,7 +144,14 @@ public class HTTPServer
 				comment += input.length();
 				for(int j = 0; j < split.length; j++)
 				{
-					input = "<td>"+split[j]+"</td>";
+					if(j == 10)
+					{
+						// input = "<td>"+getResolvedForm(split[j])+"</td>";
+					}
+					else
+					{
+						input = "<td>"+split[j]+"</td>";
+					}
 					bodyBuff.insert(comment+1, input);	 
 					comment += input.length();
 				}
@@ -139,6 +179,17 @@ public class HTTPServer
 		}
 		return null;
 	}
+	// private static String getResolvedForm(String currentVal)
+	// {
+	// 	String html = "<form action= action='/submit_resolved.html' method='post'>"
+    // 						+ "<select name='resolved' id='resolved' onchange='this.form.submit()'>";
+	// 	String 
+    //     					+	"<option value='solved'>Solved</option>"
+    //     					+	"<option value='unsolved'>UnSolved</option>"
+    // 						+ "</select>"
+	// 					+ "</form>";
+	// 	return html;
+	// }
 	private static String getHTML(String filename)
 	{
 		try
