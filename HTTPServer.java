@@ -150,7 +150,7 @@ public class HTTPServer
 					}
 					else
 					{
-						input = "<td>"+split[j]+"</td>";
+						input = "<td><p>"+split[j]+"</p></td>";
 					}
 					bodyBuff.insert(comment+1, input);	 
 					comment += input.length();
