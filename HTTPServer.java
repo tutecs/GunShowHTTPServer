@@ -57,10 +57,31 @@ public class HTTPServer
 							{
 								String hex = "" + issue[i+1] + issue[i+2];
 								char newChar = (char) (Integer.parseInt(hex, 16));
-								issue[i] = newChar;
-								issue[i+1] = Character.MIN_VALUE;
-								issue[i+2] = Character.MIN_VALUE;
-								i += 2;
+								if(newChar == '\r' || newChar == '\n') {
+									System.out.println(String.valueOf(issue));
+									// char[] newIssue = new char[issue.length+2];
+									// for(int j=0; j < i; j ++) {
+									// 	newIssue[j] = issue[j];
+									// }
+									issue[i] = '<';
+									issue[i+1] = 'b';
+									issue[i+2] = 'r';
+									issue[i+3] = '>';
+									issue[i+4] = Character.MIN_VALUE;
+									issue[i+5] = Character.MIN_VALUE;
+									// for(int j=i+6; j < newIssue.length; j++) {
+									// 	newIssue[j] = issue[j-2];
+									// }
+									// System.out.println(String.valueOf(newIssue));
+									// issue = newIssue;
+									i += 5;
+								}
+								else {
+									issue[i] = newChar;
+									issue[i+1] = Character.MIN_VALUE;
+									issue[i+2] = Character.MIN_VALUE;
+									i += 2;
+								}
 							}
 						}
 						String issueString = String.valueOf(issue);
