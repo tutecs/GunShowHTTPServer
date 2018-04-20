@@ -6,7 +6,6 @@ Java 8+
 
 ## Installing
 Run `javac HTTPServer.java`
-Create an id.txt with a single character 0
 
 ## Running
 `java HTTPServer`
